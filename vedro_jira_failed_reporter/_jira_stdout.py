@@ -12,8 +12,8 @@ MockIssue = namedtuple('MockIssue', ['key'])
 
 
 class StdoutJira:
-    def search_issues(self, prompt: str) -> list[MockIssue]:
-        print(f'Searching: {prompt}')
+    def search_issues(self, jql_str: str) -> list[MockIssue]:
+        print(f'Searching: {jql_str}')
         return []
         return [MockIssue(key='EXISTING_MOCKED_ISSUE')]
 

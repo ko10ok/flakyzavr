@@ -108,7 +108,9 @@ h2. {{color:#172b4d}}Что нужно сделать{{color}}
         '''
 
     def on_scenario_failed(self, event: Union[ScenarioPassedEvent, ScenarioFailedEvent]) -> None:
-        self._jira = LazyJiraTrier(self._jira_server, basic_auth=(self._jira_user, self._jira_password))
+        self._jira = StdoutJira()
+        if not self._dry_run:
+            self._jira = LazyJiraTrier(self._jira_server, basic_auth=(self._jira_user, self._jira_password))
 
         fail_error = str(event.scenario_result._step_results[-1].exc_info.value)
         for exception_error in self._exceptions:
