@@ -85,6 +85,7 @@ h2. {{color:#172b4d}}Контекст{{color}}
 {'-' * 80}
 {render_error(fail_error)}
 {{code}}
+{self._job_full_path}
 h2. {{color:#172b4d}}Что нужно сделать{{color}}
 {{task}}Заскипать vedro-flaky-steps плагином место падения{{task}}
 {{task}}Разобраться в причине падения и починить тест по необходимости{{task}}
