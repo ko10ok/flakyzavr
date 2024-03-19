@@ -1,3 +1,4 @@
+import re
 from copy import deepcopy
 from typing import Type
 from typing import Union
@@ -110,7 +111,6 @@ h2. {{color:#172b4d}}Что нужно сделать{{color}}
         self._jira = LazyJiraTrier(self._jira_server, basic_auth=(self._jira_user, self._jira_password))
 
         fail_error = str(event.scenario_result._step_results[-1].exc_info.value)
-        import re
         for exception_error in self._exceptions:
             if re.search(exception_error, fail_error):
                 event.scenario_result.add_extra_details(

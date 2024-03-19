@@ -2,8 +2,8 @@ from collections import namedtuple
 from json import JSONDecodeError as jsonJSONDecodeError
 from typing import Any
 
-from jira import Issue
 from jira import JIRA
+from jira import Issue
 from jira import JIRAError
 from requests import JSONDecodeError as requestsJSONDecodeError
 from rtry import retry
