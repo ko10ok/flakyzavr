@@ -15,8 +15,8 @@ from vedro.events import VirtualScenario  # type: ignore
 from vedro_jira_failed_reporter._jira_stdout import JiraUnavailable
 from vedro_jira_failed_reporter._jira_stdout import LazyJiraTrier
 from vedro_jira_failed_reporter._jira_stdout import StdoutJira
-from vedro_jira_failed_reporter.traceback import render_error
-from vedro_jira_failed_reporter.traceback import render_tb
+from vedro_jira_failed_reporter._traceback import render_error
+from vedro_jira_failed_reporter._traceback import render_tb
 
 __all__ = ("FailedJiraReporter", "FailedJiraReporterPlugin",)
 
