@@ -2,26 +2,34 @@ from types import TracebackType
 from typing import Any
 
 
-def list_code(traceback: TracebackType) -> str:
+def list_code(traceback: TracebackType, last=False) -> str:
     f_code = traceback.tb_frame.f_code
     filename = traceback.tb_frame.f_code.co_filename
-    exec_line_num = f_code.co_firstlineno
+    firstlineno = f_code.co_firstlineno
+    lineno = traceback.tb_frame.f_lineno
+
     with open(filename, 'r') as code:
         lines = [
-            f'{">" if idx == exec_line_num else " "} {str(idx): >3}|{line}'
+            f'{">" if idx + 1 == lineno else " "} {str(idx + 1): >3}|{line}'
             for idx, line in enumerate(code.read().splitlines())
         ]
 
+    if not last:
+        return '\n'.join(
+            ['# ' + filename + ':'] +
+            lines[lineno - 1:lineno]
+        )
+
     return '\n'.join(
         ['# ' + filename + ':'] +
-        lines[exec_line_num - 2:exec_line_num + 5]
+        lines[firstlineno - 2:lineno + 3]
     )
 
 
 def render_tb(traceback: TracebackType) -> str:
     if traceback.tb_next:
-        return render_tb(traceback.tb_next)
-    return list_code(traceback)
+        return list_code(traceback) + '\n\n' + render_tb(traceback.tb_next)
+    return list_code(traceback, True)
 
 
 def render_error(error: Any) -> str:
