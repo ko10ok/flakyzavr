@@ -1,0 +1,4 @@
+flake8==5.0.4
+isort==5.11.5
+mypy==1.4.0
+requests>=2.0.0
