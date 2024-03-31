@@ -21,7 +21,7 @@ publish:
 
 .PHONY: tag
 tag:
-	git tag v`cat ${vedro_jira_failed_reporter}/version`
+	git tag v`cat ${PROJECT_NAME}/version`
 
 .PHONY: check-types
 check-types:

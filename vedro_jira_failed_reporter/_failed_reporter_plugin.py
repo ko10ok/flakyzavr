@@ -1,5 +1,6 @@
 import re
 from copy import deepcopy
+from types import TracebackType
 from typing import Type
 from typing import Union
 
@@ -15,6 +16,7 @@ from vedro.events import VirtualScenario  # type: ignore
 from vedro_jira_failed_reporter._jira_stdout import JiraUnavailable
 from vedro_jira_failed_reporter._jira_stdout import LazyJiraTrier
 from vedro_jira_failed_reporter._jira_stdout import StdoutJira
+from vedro_jira_failed_reporter._traceback import get_traceback_entrypoint_filename
 from vedro_jira_failed_reporter._traceback import render_error
 from vedro_jira_failed_reporter._traceback import render_tb
 
@@ -41,6 +43,7 @@ class FailedJiraReporterPlugin(Plugin):
         self._jira_search_statuses = config.jira_search_statuses
         self._exceptions = config.exceptions
         self._jira_search_forbidden_symbols = config.jira_search_forbidden_symbols
+        self._jira_flaky_label = config.jira_flaky_label
 
     def subscribe(self, dispatcher: Dispatcher) -> None:
         if self._report_enabled:
@@ -51,7 +54,9 @@ class FailedJiraReporterPlugin(Plugin):
         for char in self._jira_search_forbidden_symbols:
             filtered_test_name = filtered_test_name.replace(char, '.')
         return f'{filtered_test_name}'
-        # return f'Флаки тест {test_name}'
+
+    def _make_search_test_file_link(self, traceback: TracebackType) -> str:
+        return get_traceback_entrypoint_filename(traceback)
 
     def _make_new_issue_summary_for_test(self, test_name: str, priority: str) -> str:
         return f'[{self._report_project_name}] Флаки тест {test_name} ({priority})'
@@ -128,6 +133,7 @@ h2. {{color:#172b4d}}Что нужно сделать{{color}}
             f'project = {self._jira_project} '
             f'and text ~ "{self._make_search_issue_for_test(test_name)}" '
             f'and status in ({statuses}) '
+            f'and AND labels = {self._jira_flaky_label} '
             'ORDER BY created'
         )
 
@@ -157,6 +163,9 @@ h2. {{color:#172b4d}}Что нужно сделать{{color}}
         priority = self._get_scenario_priority(event.scenario_result.scenario)
         issue_name = self._make_new_issue_summary_for_test(test_name, priority)
         issue_description = self._make_new_issue_description_for_test(event.scenario_result)
+        jira_labels = self._jira_labels
+        if self._jira_flaky_label not in self._jira_labels:
+            jira_labels += [self._jira_flaky_label]
         result_issue = self._jira.create_issue(
             fields={
                 'project': {'key': self._jira_project},
@@ -164,7 +173,7 @@ h2. {{color:#172b4d}}Что нужно сделать{{color}}
                 'description': issue_description,
                 'issuetype': 'Task',
                 'components': [{'name': component} for component in self._jira_components],
-                'labels': self._jira_labels,
+                'labels': jira_labels,
             }
         )
         if isinstance(result_issue, JiraUnavailable):
@@ -176,6 +185,23 @@ h2. {{color:#172b4d}}Что нужно сделать{{color}}
         event.scenario_result.add_extra_details(
             f'Заведен новый флаки тикет {self._jira_server}/browse/{result_issue.key}'
         )
+
+        traceback = event.scenario_result._step_results[-1].exc_info.traceback
+        search_linked_prompt = (
+            f'project = {self._jira_project} '
+            f'and text ~ "{self._make_search_test_file_link(traceback)}" '
+            f'and status in ({statuses}) '
+            f'and AND labels = {self._jira_flaky_label} '
+            'ORDER BY created'
+        )
+        found_issues = self._jira.search_issues(jql_str=search_linked_prompt)
+        if isinstance(result_issue, JiraUnavailable):
+            return
+        linked_issues = ', '.join([f'{self._jira_server}/browse/{result_issue.key}' for issue in found_issues])
+        event.scenario_result.add_extra_details(
+            f'Есть связанные c этим файлом тикеты: {linked_issues}'
+        )
+        # TODO связать с найденными тикетами
 
 
 class FailedJiraReporter(PluginConfig):
@@ -191,6 +217,7 @@ class FailedJiraReporter(PluginConfig):
     jira_project: str = 'NOT_SET'
     jira_components: list[str] = []
     jira_labels: list[str] = []
+    jira_flaky_label: str = 'flaky'
 
     jira_search_statuses: list[str] = ['Взят в бэклог', 'Open', 'Reopened', 'In Progress']
     jira_search_forbidden_symbols: list[str] = ['[', ']', '"']
