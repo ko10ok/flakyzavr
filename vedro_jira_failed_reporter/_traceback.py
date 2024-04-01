@@ -26,6 +26,14 @@ def list_code(traceback: TracebackType, last=False) -> str:
     )
 
 
+def get_traceback_entrypoint_filename(traceback: TracebackType) -> str:
+    if '/scenarios/' in traceback.tb_frame.f_code.co_filename:
+        return traceback.tb_frame.f_code.co_filename
+    if traceback.tb_next:
+        return get_traceback_entrypoint_filename(traceback.tb_next)
+    return traceback.tb_frame.f_code.co_filename
+
+
 def render_tb(traceback: TracebackType) -> str:
     if traceback.tb_next:
         return list_code(traceback) + '\n\n' + render_tb(traceback.tb_next)
