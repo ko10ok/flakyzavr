@@ -15,7 +15,6 @@ from vedro.events import ScenarioPassedEvent
 
 from vedro_jira_failed_reporter._jira_stdout import JiraUnavailable
 from vedro_jira_failed_reporter._jira_stdout import LazyJiraTrier
-from vedro_jira_failed_reporter._jira_stdout import StdoutJira
 from vedro_jira_failed_reporter._messages import RU_REPORTING_LANG
 from vedro_jira_failed_reporter._messages import ReportingLangSet
 from vedro_jira_failed_reporter._traceback import get_traceback_entrypoint_filename
@@ -23,6 +22,7 @@ from vedro_jira_failed_reporter._traceback import render_error
 from vedro_jira_failed_reporter._traceback import render_tb
 
 __all__ = ("FailedJiraReporter", "FailedJiraReporterPlugin",)
+
 
 class FailedJiraReporterPlugin(Plugin):
     def __init__(self, config: Type["FailedJiraReporter"]) -> None:
@@ -35,7 +35,7 @@ class FailedJiraReporterPlugin(Plugin):
         self._jira_project = config.jira_project
         self._jira_labels = config.jira_labels
         self._jira_components = config.jira_components
-        self._jira: JIRA | StdoutJira | LazyJiraTrier = StdoutJira()
+        self._jira: JIRA | LazyJiraTrier | None = None
         self._report_project_name = config.report_project_name
         self._job_path = config.job_path
         self._job_id = config.job_id
@@ -106,9 +106,11 @@ class FailedJiraReporterPlugin(Plugin):
         )
 
     def on_scenario_failed(self, event: Union[ScenarioPassedEvent, ScenarioFailedEvent]) -> None:
-        self._jira = StdoutJira()
-        if not self._dry_run:
-            self._jira = LazyJiraTrier(self._jira_server, basic_auth=(self._jira_user, self._jira_password))
+        self._jira = LazyJiraTrier(
+            self._jira_server,
+            basic_auth=(self._jira_user, self._jira_password),
+            dry_run=self._dry_run
+        )
 
         fail_error = str(event.scenario_result._step_results[-1].exc_info.value)
         for exception_error in self._exceptions:
@@ -123,7 +125,7 @@ class FailedJiraReporterPlugin(Plugin):
             f'project = {self._jira_project} '
             f'and text ~ "{self._make_search_issue_for_test(test_name)}" '
             f'and status in ({statuses}) '
-            f'and AND labels = {self._jira_flaky_label} '
+            f'and labels = {self._jira_flaky_label} '
             'ORDER BY created'
         )
 
@@ -149,7 +151,7 @@ class FailedJiraReporterPlugin(Plugin):
                 return
 
             event.scenario_result.add_extra_details(
-                self._reporting_language.ISSUE_ALREADY_EXISTS.format(jira_server=self._jira_server, issue=issue.key)
+                self._reporting_language.ISSUE_ALREADY_EXISTS.format(jira_server=self._jira_server, issue_key=issue.key)
             )
             return
 
@@ -186,20 +188,22 @@ class FailedJiraReporterPlugin(Plugin):
             f'project = {self._jira_project} '
             f'and text ~ "{self._make_search_test_file_link(traceback)}" '
             f'and status in ({statuses}) '
-            f'and AND labels = {self._jira_flaky_label} '
+            f'and labels = {self._jira_flaky_label} '
             'ORDER BY created'
         )
         found_issues = self._jira.search_issues(jql_str=search_linked_prompt)
         if isinstance(result_issue, JiraUnavailable):
             return
         if found_issues:
-            related_issues = ', '.join([f'{self._jira_server}/browse/{issue.key}' for issue in found_issues])
+            related_issues = ', '.join(
+                [f'{self._jira_server}/browse/{issue.key}' for issue in found_issues if issue.key != result_issue.key])
             event.scenario_result.add_extra_details(
                 self._reporting_language.RELATED_ISSUES_FOUND.format(
                     issues=related_issues
                 )
             )
-            # TODO связать с найденными тикетами
+            for found_issue in found_issues:
+                self._jira.create_issue_link(result_issue.key, found_issue.key)
 
 
 class FailedJiraReporter(PluginConfig):

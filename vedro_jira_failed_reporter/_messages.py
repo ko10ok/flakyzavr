@@ -52,11 +52,11 @@ RU_REPORTING_LANG = ReportingLangSet(
     NEW_COMMENT_TEXT=(
         'Повторный флак\n'
         'Приоритет теста - {priority}\n'
-        '{self._job_full_path}\n'
+        '{job_link}\n'
         '{{code:python}}\n'
-        '{render_tb(fail_traceback)}\n'
+        '{traceback}\n'
         '--------------------------------------------------------------------------------\n'
-        '{render_error(fail_error)}\n'
+        '{error}\n'
         '{{code}}\n'
     )
 )
@@ -99,11 +99,11 @@ EN_REPORTING_LANG = ReportingLangSet(
     NEW_COMMENT_TEXT=(
         'Repited test fail\n'
         'Test priority - {priority}\n'
-        '{self._job_full_path}\n'
+        '{job_link}\n'
         '{{code:python}}\n'
-        '{render_tb(fail_traceback)}\n'
+        '{traceback}\n'
         '--------------------------------------------------------------------------------\n'
-        '{render_error(fail_error)}\n'
+        '{error}\n'
         '{{code}}\n'
     )
 )
