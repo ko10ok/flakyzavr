@@ -219,7 +219,7 @@ class FailedJiraReporter(PluginConfig):
     jira_project: str = 'NOT_SET'
     jira_components: list[str] = []
     jira_labels: list[str] = []
-    jira_flaky_label: str = 'flaky'
+    jira_flaky_label: str = 'auto_flaky'
 
     jira_search_statuses: list[str] = ['Взят в бэклог', 'Open', 'Reopened', 'In Progress']
     jira_search_forbidden_symbols: list[str] = ['[', ']', '"']
