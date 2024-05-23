@@ -99,6 +99,7 @@ class FailedJiraReporterPlugin(Plugin):
         fail_error = scenario_result._step_results[-1].exc_info.value
         fail_traceback = scenario_result._step_results[-1].exc_info.traceback
         return self._reporting_language.NEW_COMMENT_TEXT.format(
+            test_name=test_name,
             priority=priority,
             job_link=self._job_full_path,
             traceback=render_tb(fail_traceback),
@@ -119,11 +120,12 @@ class FailedJiraReporterPlugin(Plugin):
                 return
 
         test_name = event.scenario_result.scenario.subject
+        test_file = self._make_search_test_file_link(event.scenario_result._step_results[-1].exc_info.traceback)
 
         statuses = ",".join([f'"{status}"' for status in self._jira_search_statuses])
         search_prompt = (
             f'project = {self._jira_project} '
-            f'and text ~ "{self._make_search_issue_for_test(test_name)}" '
+            f'and text ~ "{test_file}" '
             f'and status in ({statuses}) '
             f'and labels = {self._jira_flaky_label} '
             'ORDER BY created'
@@ -183,10 +185,9 @@ class FailedJiraReporterPlugin(Plugin):
             self._reporting_language.ISSUE_CREATED.format(jira_server=self._jira_server, issue_key=result_issue.key)
         )
 
-        traceback = event.scenario_result._step_results[-1].exc_info.traceback
         search_linked_prompt = (
             f'project = {self._jira_project} '
-            f'and text ~ "{self._make_search_test_file_link(traceback)}" '
+            f'and text ~ "{test_file}" '
             f'and status in ({statuses}) '
             f'and labels = {self._jira_flaky_label} '
             'ORDER BY created'
