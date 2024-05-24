@@ -51,12 +51,6 @@ class FailedJiraReporterPlugin(Plugin):
         if self._report_enabled:
             dispatcher.listen(ScenarioFailedEvent, self.on_scenario_failed)
 
-    def _make_search_issue_for_test(self, test_name: str) -> str:
-        filtered_test_name = deepcopy(test_name)
-        for char in self._jira_search_forbidden_symbols:
-            filtered_test_name = filtered_test_name.replace(char, '.')
-        return f'{filtered_test_name}'
-
     def _make_search_test_file_link(self, traceback: TracebackType) -> str:
         return get_traceback_entrypoint_filename(traceback)
 
@@ -184,27 +178,6 @@ class FailedJiraReporterPlugin(Plugin):
         event.scenario_result.add_extra_details(
             self._reporting_language.ISSUE_CREATED.format(jira_server=self._jira_server, issue_key=result_issue.key)
         )
-
-        search_linked_prompt = (
-            f'project = {self._jira_project} '
-            f'and text ~ "{test_file}" '
-            f'and status in ({statuses}) '
-            f'and labels = {self._jira_flaky_label} '
-            'ORDER BY created'
-        )
-        found_issues = self._jira.search_issues(jql_str=search_linked_prompt)
-        if isinstance(result_issue, JiraUnavailable):
-            return
-        if found_issues:
-            related_issues = ', '.join(
-                [f'{self._jira_server}/browse/{issue.key}' for issue in found_issues if issue.key != result_issue.key])
-            event.scenario_result.add_extra_details(
-                self._reporting_language.RELATED_ISSUES_FOUND.format(
-                    issues=related_issues
-                )
-            )
-            for found_issue in found_issues:
-                self._jira.create_issue_link(result_issue.key, found_issue.key)
 
 
 class FailedJiraReporter(PluginConfig):
