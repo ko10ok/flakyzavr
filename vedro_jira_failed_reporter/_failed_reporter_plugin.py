@@ -1,5 +1,6 @@
 import re
 from copy import deepcopy
+from pathlib import Path
 from types import TracebackType
 from typing import Type
 from typing import Union
@@ -54,6 +55,10 @@ class FailedJiraReporterPlugin(Plugin):
     def _make_search_test_file_link(self, traceback: TracebackType) -> str:
         return get_traceback_entrypoint_filename(traceback)
 
+    def _make_scenario_root_test_file_link(self, traceback: TracebackType) -> str:
+        full_path = get_traceback_entrypoint_filename(traceback)
+        return str(Path(full_path).relative_to('/home/ubuntu/workdir'))
+
     def _make_new_issue_summary_for_test(self, test_name: str, priority: str) -> str:
         return self._reporting_language.NEW_ISSUE_SUMMARY.format(
             project_name=self._report_project_name,
@@ -75,11 +80,14 @@ class FailedJiraReporterPlugin(Plugin):
 
     def _make_new_issue_description_for_test(self, scenario_result: ScenarioResult) -> str:
         test_name = scenario_result.scenario.subject
+
         priority = self._get_scenario_priority(scenario_result.scenario)
         fail_error = scenario_result._step_results[-1].exc_info.value
         fail_traceback = scenario_result._step_results[-1].exc_info.traceback
+        test_file = self._make_scenario_root_test_file_link(fail_traceback)
         description = self._reporting_language.NEW_ISSUE_TEXT.format(
             test_name=test_name,
+            test_file=test_file,
             priority=priority,
             traceback=render_tb(fail_traceback),
             error=render_error(fail_error),
@@ -119,7 +127,7 @@ class FailedJiraReporterPlugin(Plugin):
         statuses = ",".join([f'"{status}"' for status in self._jira_search_statuses])
         search_prompt = (
             f'project = {self._jira_project} '
-            f'and text ~ "{test_file}" '
+            f'and description ~ "{test_file}" '
             f'and status in ({statuses}) '
             f'and labels = {self._jira_flaky_label} '
             'ORDER BY created'
