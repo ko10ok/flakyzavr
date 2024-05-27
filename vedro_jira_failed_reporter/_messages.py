@@ -51,6 +51,9 @@ RU_REPORTING_LANG = ReportingLangSet(
     ),
     NEW_COMMENT_TEXT=(
         'Повторный флак\n'
+        '{{code:python}}\n'
+        '{test_name}\n'
+        '{{code}}\n'
         'Приоритет теста - {priority}\n'
         '{job_link}\n'
         '{{code:python}}\n'
