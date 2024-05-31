@@ -75,11 +75,13 @@ class FailedJiraReporterPlugin(Plugin):
 
     def _make_new_issue_description_for_test(self, scenario_result: ScenarioResult) -> str:
         test_name = scenario_result.scenario.subject
+        test_file = self._make_search_test_file_link(scenario_result._step_results[-1].exc_info.traceback)
         priority = self._get_scenario_priority(scenario_result.scenario)
         fail_error = scenario_result._step_results[-1].exc_info.value
         fail_traceback = scenario_result._step_results[-1].exc_info.traceback
         description = self._reporting_language.NEW_ISSUE_TEXT.format(
             test_name=test_name,
+            test_file=test_file,
             priority=priority,
             traceback=render_tb(fail_traceback),
             error=render_error(fail_error),
@@ -119,7 +121,7 @@ class FailedJiraReporterPlugin(Plugin):
         statuses = ",".join([f'"{status}"' for status in self._jira_search_statuses])
         search_prompt = (
             f'project = {self._jira_project} '
-            f'and text ~ "{test_file}" '
+            f'and description ~ "{test_file}" '
             f'and status in ({statuses}) '
             f'and labels = {self._jira_flaky_label} '
             'ORDER BY created'

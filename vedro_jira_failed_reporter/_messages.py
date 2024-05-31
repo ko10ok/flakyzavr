@@ -35,6 +35,7 @@ RU_REPORTING_LANG = ReportingLangSet(
     NEW_ISSUE_TEXT=(
         'h2. {{color:#172b4d}}Контекст{{color}}\n'
         'Флаки тест \n'
+        '{test_file}\n'
         '{{code:python}}\n'
         '{test_name}\n'
         '{{code}}\n'
