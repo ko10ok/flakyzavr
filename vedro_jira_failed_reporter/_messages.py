@@ -50,6 +50,8 @@ RU_REPORTING_LANG = ReportingLangSet(
         '{{code}}\n'
         '{job_link}\n'
         'h2. {{color:#172b4d}}Что нужно сделать{{color}}\n'
+        '{task}}Указать вес тикета{{task}}\n'
+        '{task}}Проверить приоритет (в тесте и тикете){{task}}\n'
         '{{task}}Заскипать vedro-flaky-steps плагином место падения{{task}}\n'
         '{{task}}Разобраться в причине падения и починить тест по необходимости{{task}}'
     ),

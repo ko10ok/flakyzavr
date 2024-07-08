@@ -51,8 +51,8 @@ class FailedJiraReporterPlugin(Plugin):
         if self._report_enabled:
             dispatcher.listen(ScenarioFailedEvent, self.on_scenario_failed)
 
-    def _make_search_test_file_link(self, traceback: TracebackType) -> str:
-        return get_traceback_entrypoint_filename(traceback)
+    def _make_search_test_file_link(self, scenario_result: ScenarioResult) -> str:
+        return str(scenario_result.scenario.rel_path)
 
     def _make_new_issue_summary_for_test(self, test_name: str, priority: str) -> str:
         return self._reporting_language.NEW_ISSUE_SUMMARY.format(
@@ -75,7 +75,7 @@ class FailedJiraReporterPlugin(Plugin):
 
     def _make_new_issue_description_for_test(self, scenario_result: ScenarioResult) -> str:
         test_name = scenario_result.scenario.subject
-        test_file = self._make_search_test_file_link(scenario_result._step_results[-1].exc_info.traceback)
+        test_file = self._make_search_test_file_link(scenario_result)
         priority = self._get_scenario_priority(scenario_result.scenario)
         fail_error = scenario_result._step_results[-1].exc_info.value
         fail_traceback = scenario_result._step_results[-1].exc_info.traceback
@@ -116,7 +116,7 @@ class FailedJiraReporterPlugin(Plugin):
                 return
 
         test_name = event.scenario_result.scenario.subject
-        test_file = self._make_search_test_file_link(event.scenario_result._step_results[-1].exc_info.traceback)
+        test_file = self._make_search_test_file_link(event.scenario_result)
 
         statuses = ",".join([f'"{status}"' for status in self._jira_search_statuses])
         search_prompt = (
@@ -197,7 +197,8 @@ class FailedJiraReporter(PluginConfig):
     jira_labels: list[str] = []
     jira_flaky_label: str = 'flaky'
 
-    jira_search_statuses: list[str] = ['Взят в бэклог', 'Open', 'Reopened', 'In Progress']
+    jira_search_statuses: list[str] = ['Взят в бэклог', 'Open', 'Reopened', 'In Progress',
+                                       'Code Review', 'Resolved', 'Testing']
     jira_search_forbidden_symbols: list[str] = ['[', ']', '"']
     report_project_name: str = 'NOT_SET'
     job_path = '{job_id}'
