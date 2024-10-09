@@ -43,6 +43,7 @@ class FailedJiraReporterPlugin(Plugin):
         self._jira_search_forbidden_symbols = config.jira_search_forbidden_symbols
         self._jira_flaky_label = config.jira_flaky_label
         self._reporting_language = config.reporting_language
+        self._jira_additional_data = config.jira_additional_data
 
     def subscribe(self, dispatcher: Dispatcher) -> None:
         if self._report_enabled:
@@ -153,8 +154,7 @@ class FailedJiraReporterPlugin(Plugin):
         jira_labels = self._jira_labels
         if self._jira_flaky_label not in self._jira_labels:
             jira_labels += [self._jira_flaky_label]
-        result_issue = self._jira.create_issue(
-            fields={
+        created_ticket_fields = {
                 'project': {'key': self._jira_project},
                 'summary': issue_name,
                 'description': issue_description,
@@ -162,7 +162,9 @@ class FailedJiraReporterPlugin(Plugin):
                 'components': [{'name': component} for component in self._jira_components],
                 'labels': jira_labels,
             }
-        )
+        if self._jira_additional_data:
+            created_ticket_fields.update(self._jira_additional_data)
+        result_issue = self._jira.create_issue(fields=created_ticket_fields)
         if isinstance(result_issue, JiraUnavailable):
             event.scenario_result.add_extra_details(
                 self._reporting_language.SKIP_CREATING_ISSUE_DUE_TO_JIRA_CREATE_UNAVAILABILITY.format(
@@ -194,6 +196,9 @@ class FailedJiraReporter(PluginConfig):
     jira_search_statuses: list[str] = ['Взят в бэклог', 'Open', 'Reopened', 'In Progress',
                                        'Code Review', 'Resolved', 'Testing']
     jira_search_forbidden_symbols: list[str] = ['[', ']', '"']
+    # additional data for created jira issue: {'field_id': 'value'}
+    # Example: {'customfield_10000': 'test'}
+    jira_additional_data: dict[str, str] = {}
     report_project_name: str = 'NOT_SET'
     job_path = '{job_id}'
     job_id: str = 'NOT_SET'
