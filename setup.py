@@ -12,7 +12,7 @@ def find_dev_required() -> list[str]:
         return f.read().splitlines()
 
 
-def get_version(filename='vedro_jira_failed_reporter/version') -> str:
+def get_version(filename='flakyzavr/version') -> str:
     return open(filename, "r").read().strip()
 
 
@@ -37,6 +37,6 @@ setup(
         "Typing :: Typed",
     ],
     package_data={
-        'vedro_jira_failed_reporter': ['version', 'py.typed'],
+        'flakyzavr': ['version', 'py.typed'],
     },
 )

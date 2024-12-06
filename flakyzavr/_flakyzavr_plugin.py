@@ -11,18 +11,18 @@ from vedro.core import VirtualScenario
 from vedro.events import ScenarioFailedEvent
 from vedro.events import ScenarioPassedEvent
 
-from vedro_jira_failed_reporter._jira_stdout import JiraUnavailable
-from vedro_jira_failed_reporter._jira_stdout import LazyJiraTrier
-from vedro_jira_failed_reporter._messages import RU_REPORTING_LANG
-from vedro_jira_failed_reporter._messages import ReportingLangSet
-from vedro_jira_failed_reporter._traceback import render_error
-from vedro_jira_failed_reporter._traceback import render_tb
+from flakyzavr._jira_stdout import JiraUnavailable
+from flakyzavr._jira_stdout import LazyJiraTrier
+from flakyzavr._messages import RU_REPORTING_LANG
+from flakyzavr._messages import ReportingLangSet
+from flakyzavr._traceback import render_error
+from flakyzavr._traceback import render_tb
 
-__all__ = ("FailedJiraReporter", "FailedJiraReporterPlugin",)
+__all__ = ("Flakyzavr", "FlakyzavrPlugin",)
 
 
-class FailedJiraReporterPlugin(Plugin):
-    def __init__(self, config: Type["FailedJiraReporter"]) -> None:
+class FlakyzavrPlugin(Plugin):
+    def __init__(self, config: Type["Flakyzavr"]) -> None:
         super().__init__(config)
         self._report_enabled = config.report_enabled
 
@@ -178,8 +178,8 @@ class FailedJiraReporterPlugin(Plugin):
         )
 
 
-class FailedJiraReporter(PluginConfig):
-    plugin = FailedJiraReporterPlugin
+class Flakyzavr(PluginConfig):
+    plugin = FlakyzavrPlugin
     description = "Report to jira about failed tests"
 
     enabled = True
