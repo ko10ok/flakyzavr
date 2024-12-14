@@ -17,7 +17,7 @@ def get_version(filename='flakyzavr/version') -> str:
 
 
 setup(
-    name="vedro-jira-failed-reporter",
+    name="flakyzavr",
     version=get_version(),
     description="vedro.io plugin for reporting about flaky tests into jira "
                 "(with plugin enabled in flaky check runs)",
@@ -26,7 +26,7 @@ setup(
     author="Yuriy Sagitov",
     author_email="pro100.ko10ok@gmail.com",
     python_requires=">=3.7",
-    url="https://github.com/ko10ok/vedro-jira-failed-reporter",
+    url="https://github.com/ko10ok/flakyzavr",
     license="Apache-2.0",
     packages=find_packages(exclude=["tests", "tests.*"]),
     install_requires=find_required(),
