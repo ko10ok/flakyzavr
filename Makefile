@@ -1,4 +1,4 @@
-PROJECT_NAME=vedro_jira_failed_reporter
+PROJECT_NAME=flakyzavr
 
 .PHONY: install-deps
 install-deps:
