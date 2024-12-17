@@ -11,7 +11,7 @@ class Config(vedro.Config):
 
     class Plugins(vedro.Config.Plugins):
     
-        class VedroJiraReporter(vedro_jira_failed_reporter.FailedJiraReporter):
+        class Flakyzavr(flakyzavr.Flakyzavr):
             enabled = True
             report_enabled = True
 
