@@ -1,4 +1,4 @@
-# vedro-jira-failed-reporter
+# flakyzavr
 
 Make report to jira when scenario fails
 
