@@ -21,7 +21,10 @@ class Config(vedro.Config):
             jira_project = 'ProjewctName'
             jira_components = ['chat']
             jira_labels: list[str] = ['flaky', 'tech_debt_qa']
-
+            jira_additional_data: dict[str, str] = {
+                'customfield_****': 'FieldValue',
+            }
+            jira_issue_type_id: str = '3'
             jira_search_statuses: list[str] = ['Взят в бэклог', 'Open', 'Reopened', 'In Progress']
             report_project_name: str = 'Chat'
             job_path = 'https://gitlab.com/chat-space/chat/-/jobs/{job_id}'
