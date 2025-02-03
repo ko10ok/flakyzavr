@@ -117,7 +117,7 @@ class FlakyzavrPlugin(Plugin):
         statuses = ",".join([f'"{status}"' for status in self._jira_search_statuses])
         search_prompt = (
             f'project = {self._jira_project} '
-            f'and description ~ "{test_file}" '
+            f'and description ~ "\\"{test_file}\\"" '
             f'and status in ({statuses}) '
             f'and labels = {self._jira_flaky_label} '
             'ORDER BY created'
