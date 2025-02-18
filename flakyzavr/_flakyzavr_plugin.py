@@ -44,6 +44,7 @@ class FlakyzavrPlugin(Plugin):
         self._jira_flaky_label = config.jira_flaky_label
         self._reporting_language = config.reporting_language
         self._jira_additional_data = config.jira_additional_data
+        self._jira_issue_type_id = config.jira_issue_type_id
 
     def subscribe(self, dispatcher: Dispatcher) -> None:
         if self._report_enabled:
@@ -116,7 +117,7 @@ class FlakyzavrPlugin(Plugin):
         statuses = ",".join([f'"{status}"' for status in self._jira_search_statuses])
         search_prompt = (
             f'project = {self._jira_project} '
-            f'and description ~ "{test_file}" '
+            f'and description ~ "\\"{test_file}\\"" '
             f'and status in ({statuses}) '
             f'and labels = {self._jira_flaky_label} '
             'ORDER BY created'
@@ -158,7 +159,7 @@ class FlakyzavrPlugin(Plugin):
                 'project': {'key': self._jira_project},
                 'summary': issue_name,
                 'description': issue_description,
-                'issuetype': 'Task',
+                'issuetype': {'id': self._jira_issue_type_id},
                 'components': [{'name': component} for component in self._jira_components],
                 'labels': jira_labels,
             }
@@ -199,6 +200,7 @@ class Flakyzavr(PluginConfig):
     # additional data for created jira issue: {'field_id': 'value'}
     # Example: {'customfield_10000': 'test'}
     jira_additional_data: dict[str, str] = {}
+    jira_issue_type_id: str = '3'
     report_project_name: str = 'NOT_SET'
     job_path = '{job_id}'
     job_id: str = 'NOT_SET'
