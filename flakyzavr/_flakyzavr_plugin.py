@@ -79,7 +79,7 @@ class FlakyzavrPlugin(Plugin):
             test_name=test_name,
             test_file=test_file,
             priority=priority,
-            traceback=render_tb(fail_traceback),
+            traceback=render_tb(fail_traceback, test_file=test_file),
             error=render_error(fail_error),
             job_link=self._job_full_path
         )
@@ -94,7 +94,7 @@ class FlakyzavrPlugin(Plugin):
             test_name=test_name,
             priority=priority,
             job_link=self._job_full_path,
-            traceback=render_tb(fail_traceback),
+            traceback=render_tb(fail_traceback, test_file=str(scenario_result.scenario.rel_path)),
             error=render_error(fail_error),
         )
 
