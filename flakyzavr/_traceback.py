@@ -2,7 +2,7 @@ from types import TracebackType
 from typing import Any
 
 
-def list_code(traceback: TracebackType, last=False) -> str:
+def list_code(traceback: TracebackType, scenario_path: str) -> str:
     f_code = traceback.tb_frame.f_code
     filename = traceback.tb_frame.f_code.co_filename
     firstlineno = f_code.co_firstlineno
@@ -14,7 +14,7 @@ def list_code(traceback: TracebackType, last=False) -> str:
             for idx, line in enumerate(code.read().splitlines())
         ]
 
-    if not last:
+    if scenario_path not in filename:
         return '\n'.join(
             ['# ' + filename + ':'] +
             lines[lineno - 1:lineno]
@@ -26,10 +26,10 @@ def list_code(traceback: TracebackType, last=False) -> str:
     )
 
 
-def render_tb(traceback: TracebackType) -> str:
+def render_tb(traceback: TracebackType, test_file: str) -> str:
     if traceback.tb_next:
-        return list_code(traceback) + '\n\n' + render_tb(traceback.tb_next)
-    return list_code(traceback, True)
+        return list_code(traceback, test_file) + '\n\n' + render_tb(traceback.tb_next, test_file)
+    return list_code(traceback, test_file)
 
 
 def render_error(error: Any) -> str:
