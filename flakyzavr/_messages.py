@@ -52,6 +52,7 @@ RU_REPORTING_LANG = ReportingLangSet(
         'h2. {{color:#172b4d}}Что нужно сделать{{color}}\n'
         '{{task}}Указать вес тикета{{task}}\n'
         '{{task}}Проверить приоритет (в тесте и тикете){{task}}\n'
+        '{{task}}Проверить, нет ли похожих тикетов/дублей по такой же проблеме{{task}}\n'
         '{{task}}Заскипать vedro-flaky-steps плагином место падения{{task}}\n'
         '{{task}}Разобраться в причине падения и починить тест по необходимости{{task}}'
     ),
@@ -102,6 +103,7 @@ EN_REPORTING_LANG = ReportingLangSet(
         '{{code}}\n'
         '{job_link}\n'
         'h2. {{color:#172b4d}}Steps to do:{{color}}\n'
+        '{{task}}Check for similar/duplicate tickets with the same issue{{task}}\n'
         '{{task}}Skip flaky test in repo{{task}}\n'
         '{{task}}Fix fail cause{{task}}'
     ),
