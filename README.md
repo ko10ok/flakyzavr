@@ -6,7 +6,7 @@ Make report to jira when scenario fails
 ## Install & setup
 
 Add config
-```
+```python
 class Config(vedro.Config):
 
     class Plugins(vedro.Config.Plugins):
@@ -33,4 +33,24 @@ class Config(vedro.Config):
             dry_run: bool = False
 
             exceptions: list[str] = []
+```
+
+## Customize your report
+
+```python
+import flakyzavr
+from flakyzavr import BaseReportingPhrases
+
+class Config(vedro.Config):
+    class Plugins(vedro.Config.Plugins):
+        class Flakyzavr(flakyzavr.Flakyzavr):
+            enabled = True
+            reporting_phrases =  BaseReportingPhrases(
+                NEW_ISSUE_TEXT = 'what a foolish blooper arised:\n'
+                    'Test: "{test_name}" failed\n'
+                    'File: {test_file}\n'
+                    'Blooper: \n{{code:python3}}{traceback}{{code}}\n'
+                    'Blooper details: {{code:python3}}{error}{{code}}'
+                    'Link: {job_link}'
+            )
 ```
