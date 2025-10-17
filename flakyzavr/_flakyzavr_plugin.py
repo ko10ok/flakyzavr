@@ -14,7 +14,7 @@ from vedro.events import ScenarioPassedEvent
 from flakyzavr._jira_stdout import JiraUnavailable
 from flakyzavr._jira_stdout import LazyJiraTrier
 from flakyzavr._messages import RU_REPORTING_LANG
-from flakyzavr._messages import ReportingLangSet
+from flakyzavr._messages import BaseReportingPhrases
 from flakyzavr._traceback import render_error
 from flakyzavr._traceback import render_tb
 
@@ -42,7 +42,7 @@ class FlakyzavrPlugin(Plugin):
         self._exceptions = config.exceptions
         self._jira_search_forbidden_symbols = config.jira_search_forbidden_symbols
         self._jira_flaky_label = config.jira_flaky_label
-        self._reporting_language = config.reporting_language
+        self._reporting_language = config.reporting_phrases
         self._jira_additional_data = config.jira_additional_data
         self._jira_issue_type_id = config.jira_issue_type_id
 
@@ -209,4 +209,4 @@ class Flakyzavr(PluginConfig):
 
     exceptions: list[str] = [r'.*codec can\'t decode byte.*']
 
-    reporting_language: ReportingLangSet = RU_REPORTING_LANG
+    reporting_phrases: BaseReportingPhrases = RU_REPORTING_LANG
