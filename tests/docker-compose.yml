@@ -1,0 +1,14 @@
+services:
+  e2e:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: 'sh -c "trap : TERM INT; sleep 604800; wait"'
+    volumes:
+      - .:/tests
+      - ..:/flakyzavr
+
+  mock:
+    image: vedrouniverse/jj:2.10.0
+    ports:
+      - "80"

@@ -2,12 +2,44 @@ name: Publish
 
 on:
   push:
+    branches:
+      - "main"
     tags:
       - 'v*.*.*'
+      - 'v*.*.*a*'     # alpha (e.g., v2.0.0a1)
+      - 'v*.*.*b*'     # beta (e.g., v2.0.0b1)
+      - 'v*.*.*rc*'    # release candidate (e.g., v2.0.0rc1)
+  pull_request:
+    branches:
+      - "**"
 
 jobs:
+  tests:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [ '3.10', '3.11', '3.12', '3.13', '3.14' ]
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+
+      - name: Install DC
+        uses: KengoTODA/actions-setup-docker-compose@v1
+        with:
+          version: '2.29.2'
+
+      - name: Run e2e tests
+        env:
+          COMPOSE_FILE: "docker-compose.yml"
+          CI_DC_DISABLE_TTY: "-T"
+          PYTHON_VERSION: ${{ matrix.python-version }}
+        run: |
+          cd tests
+          make e2e-run args='-vvv' -B
+
   publish_pypi:
     runs-on: ubuntu-latest
+    needs: tests
 
     steps:
     - name: Checkout
