@@ -2,8 +2,8 @@ from collections import namedtuple
 from json import JSONDecodeError as jsonJSONDecodeError
 from typing import Any
 
-from jira import Issue
 from jira import JIRA
+from jira import Issue
 from jira import JIRAError
 from requests import JSONDecodeError as requestsJSONDecodeError
 from rtry import retry
@@ -35,10 +35,10 @@ class LazyJiraTrier:
                     raise JiraAuthorizationError from None
                 self._jira = None
                 return JiraUnavailable()
-            except jsonJSONDecodeError as e:
+            except jsonJSONDecodeError:
                 self._jira = None
                 return JiraUnavailable()
-            except requestsJSONDecodeError as e:
+            except requestsJSONDecodeError:
                 self._jira = None
                 return JiraUnavailable()
 
@@ -57,11 +57,11 @@ class LazyJiraTrier:
                 attempts=3,
                 swallow=(JIRAError, jsonJSONDecodeError, requestsJSONDecodeError)
             )(self._jira.search_issues)(jql_str=jql_str)
-        except JIRAError as e:
+        except JIRAError:
             return JiraUnavailable()
-        except jsonJSONDecodeError as e:
+        except jsonJSONDecodeError:
             return JiraUnavailable()
-        except requestsJSONDecodeError as e:
+        except requestsJSONDecodeError:
             return JiraUnavailable()
 
     def add_comment(self, issue: Issue, comment: str) -> None | JiraUnavailable:
@@ -71,17 +71,16 @@ class LazyJiraTrier:
 
         if self._dry_run:
             print(f'Comment to create: {comment} in {issue.key}')
-            return
+            return None
 
         try:
             self._jira.add_comment(issue, comment)
-        except JIRAError as e:
+        except JIRAError:
             return JiraUnavailable()
-        except jsonJSONDecodeError as e:
+        except jsonJSONDecodeError:
             return JiraUnavailable()
-        except requestsJSONDecodeError as e:
+        except requestsJSONDecodeError:
             return JiraUnavailable()
-        return
 
     def create_issue(self, fields: dict[str, Any]) -> Issue | MockIssue | JiraUnavailable:
         res = retry(delay=1, attempts=3, until=lambda x: isinstance(x, JiraUnavailable), logger=print)(self.connect)()
@@ -94,11 +93,11 @@ class LazyJiraTrier:
 
         try:
             issue = self._jira.create_issue(fields=fields)
-        except JIRAError as e:
+        except JIRAError:
             return JiraUnavailable()
-        except jsonJSONDecodeError as e:
+        except jsonJSONDecodeError:
             return JiraUnavailable()
-        except requestsJSONDecodeError as e:
+        except requestsJSONDecodeError:
             return JiraUnavailable()
         return issue
 
@@ -109,7 +108,7 @@ class LazyJiraTrier:
 
         if self._dry_run:
             print(f'Link {inwardIssue} with {outwardIssue}')
-            return
+            return None
 
         try:
             self._jira.create_issue_link(
@@ -117,10 +116,9 @@ class LazyJiraTrier:
                 inwardIssue=inwardIssue,
                 outwardIssue=outwardIssue
             )
-        except JIRAError as e:
+        except JIRAError:
             return JiraUnavailable()
-        except jsonJSONDecodeError as e:
+        except jsonJSONDecodeError:
             return JiraUnavailable()
-        except requestsJSONDecodeError as e:
+        except requestsJSONDecodeError:
             return JiraUnavailable()
-        return
