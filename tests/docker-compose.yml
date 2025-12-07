@@ -4,6 +4,8 @@ services:
       context: .
       dockerfile: Dockerfile
     command: 'sh -c "trap : TERM INT; sleep 604800; wait"'
+    environment:
+      - JJ_REMOTE_MOCK_URL=http://mock:80
     volumes:
       - .:/tests
       - ..:/flakyzavr
