@@ -26,7 +26,15 @@ deps: up
 e2e-run: up deps
 	docker-compose exec ${CI_DC_DISABLE_TTY} e2e /venv/bin/python3 -m vedro run $(args)
 
+.PHONY: e2e-update-requirements
+e2e-update-requirements:
+	docker-compose exec e2e uv pip compile requirements.in -o requirements.txt $(args)
+
+.PHONY: e2e-sync-requirements
+e2e-sync-requirements:
+	docker-compose exec e2e uv pip sync --python /venv/bin/python3 requirements.txt
+
 .PHONY: e2e-fix-imports
 e2e-fix-imports:
-	@docker compose exec e2e sh -c 'python3 -m autoflake --remove-all-unused-imports --ignore-init-module-imports --recursive --in-place .'
-	@docker compose exec e2e sh -c 'python3 -m isort .'
+	docker-compose exec e2e sh -c '/venv/bin/python3 -m autoflake --remove-all-unused-imports --ignore-init-module-imports --recursive --in-place .'
+	docker-compose exec e2e sh -c '/venv/bin/python3 -m isort .'

@@ -3,3 +3,5 @@ vedro-valera-validator
 httpx
 d42<3.0
 district42-exp-types
+autoflake
+isort

@@ -2,6 +2,8 @@
 #    uv pip compile requirements.in -o requirements.txt
 anyio==4.12.0
     # via httpx
+autoflake==2.3.1
+    # via -r requirements.in
 cabina==1.1.2
     # via vedro
 certifi==2025.11.12
@@ -29,6 +31,8 @@ idna==3.11
     # via
     #   anyio
     #   httpx
+isort==7.0.0
+    # via -r requirements.in
 markdown-it-py==4.0.0
     # via rich
 mdurl==0.1.2
@@ -40,6 +44,8 @@ niltype==1.0.2
     #   district42-exp-types
     #   th
     #   vedro
+pyflakes==3.4.0
+    # via autoflake
 pygments==2.19.2
     # via rich
 pyparsing==3.2.5
@@ -50,6 +56,8 @@ th==0.4.1
     # via
     #   d42
     #   district42-exp-types
+tomli==2.3.0
+    # via autoflake
 typing-extensions==4.15.0
     # via
     #   anyio

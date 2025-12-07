@@ -81,6 +81,7 @@ show-tags:
 	@echo "Tags for version ${VERSION}:"
 	@git tag -l "v${VERSION}*" | sort -V
 
+
 .PHONY: check-types
 check-types:
 	python3 -m mypy ${PROJECT_NAME} --strict
