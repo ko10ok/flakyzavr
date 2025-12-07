@@ -13,7 +13,7 @@ def temp_file(file_path: Union[str, Path], content: str):
     :param content: Content to write to the file
 
     Usage:
-        with temp_file("path/to/file.txt", "Hello World") as path:
+        with temp_file("rel_path/to/file.txt", "Hello World") as rel_path:
             # file exists here
             pass
         # file is deleted here

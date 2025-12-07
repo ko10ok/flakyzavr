@@ -1,5 +1,3 @@
-from typing import Dict
-
 import jj
 from jj.http import GET
 from jj.http import POST
@@ -18,6 +16,7 @@ def mocked_jira_server_info() -> Mocked:
         response=jj.Response(status=jira_status, json=jira_response),
     )
 
+
 def mocked_jira_fields() -> Mocked:
     endpoint = '/rest/api/2/field'
     jira_status = 200
@@ -29,7 +28,8 @@ def mocked_jira_fields() -> Mocked:
         response=jj.Response(status=jira_status, json=jira_response),
     )
 
-def mocked_jira_search(jira_status: int = 200, jira_response: Dict = None) -> Mocked:
+
+def mocked_jira_search(jira_status: int = 200, jira_response: dict = None) -> Mocked:
     endpoint = f'/rest/api/2/search'
 
     if jira_response is None:
@@ -43,7 +43,10 @@ def mocked_jira_search(jira_status: int = 200, jira_response: Dict = None) -> Mo
         response=jj.Response(status=jira_status, json=jira_response),
     )
 
-def mocked_jira_create(key: str) -> Mocked:
+
+def mocked_jira_create(key: str = None) -> Mocked:
+    if key is None:
+        key = 'BLABLA-123'
     endpoint = f'/rest/api/2/issue'
     jira_status = 201
     jira_response = {
@@ -53,6 +56,18 @@ def mocked_jira_create(key: str) -> Mocked:
         matcher=jj.match(POST, endpoint),
         response=jj.Response(status=jira_status, json=jira_response),
     )
+
+def mocked_jira_create_comment(key: str) -> Mocked:
+    endpoint = f'/rest/api/2/issue/{key}/comment'
+    jira_status = 201
+    jira_response = {
+        'id': '10000',
+    }
+    return mocked(
+        matcher=jj.match(POST, endpoint),
+        response=jj.Response(status=jira_status, json=jira_response),
+    )
+
 
 def mocked_jira_get_issue(key: str) -> Mocked:
     endpoint = f'/rest/api/2/issue/{key}'

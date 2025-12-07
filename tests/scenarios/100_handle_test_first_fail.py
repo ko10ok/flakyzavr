@@ -1,27 +1,26 @@
 import base64
+from pathlib import Path
 from time import monotonic_ns
-from unittest.mock import Mock
 
 import vedro
 from d42 import fake
-from d42 import schema
+from flakyzavr import RU_REPORTING_LANG
+from flakyzavr import Flakyzavr
+from flakyzavr import FlakyzavrPlugin
 from jj_d42 import HistorySchema
-from vedro.core import ExcInfo
-from vedro.core import ScenarioResult
-from vedro.core import StepResult
 from vedro.events import ScenarioFailedEvent
 
+from contexts.issue_summary import issue_summary
+from contexts.mocks.mocked_failed_scenario_result import mocked_failed_scenario_result
 from contexts.mocks.mocked_jira import mocked_jira_create
 from contexts.mocks.mocked_jira import mocked_jira_fields
 from contexts.mocks.mocked_jira import mocked_jira_get_issue
 from contexts.mocks.mocked_jira import mocked_jira_search
 from contexts.mocks.mocked_jira import mocked_jira_server_info
-from flakyzavr import Flakyzavr
-from flakyzavr import FlakyzavrPlugin
-from flakyzavr import RU_REPORTING_LANG
+from contexts.mocks.mocked_python_traceback import mocked_traced_file
 from helpers.temp_file import temp_file
-from helpers.vedro.scenario import make_scenario
-from helpers.vedro.scenario import make_step
+from libs.issue_priority import IssuePriority
+from schemas.scenario import ScenarioNameSchema
 
 
 class Scenario(vedro.Scenario):
@@ -57,58 +56,40 @@ class Scenario(vedro.Scenario):
         self.plugin = FlakyzavrPlugin(config=self.plugin_config)
 
     async def given_failed_scenario(self):
-        self.tests_dir = '/tmp/tests'
+        self.tests_dir = Path('/tmp/tests')
 
-        self.scenario_name = fake(schema.str.len(1, 50))
-        self.scenario_filename = f"scenario_{monotonic_ns()}.py"
-        self.scenario_project_filename = f'scenarios/{self.scenario_filename}'
+        self.scenario_name = fake(ScenarioNameSchema)
+        self.scenario_project_filename = Path(f'scenarios/scenario_{monotonic_ns()}.py')
         self.scenario_path = f'{self.tests_dir}/{self.scenario_project_filename}'
 
-
-        self.scenario = make_scenario(name=self.scenario_name, path=self.scenario_path)
-        self.scenario_result = ScenarioResult(scenario=self.scenario)
-
-        self.step = make_step()
-        self.step_result = StepResult(self.step)
-
-
-        self.tb_frame = Mock()
-        self.tb_frame.f_lineno = 4
-        self.tb_frame.f_code = Mock()
-        self.tb_frame.f_code.co_filename = self.scenario_path
-        self.tb_frame.f_code.co_firstlineno = 2
-
-        self.filecontent = '\n'.join([
+        self.file_content = '\n'.join([
             f'line {line_no}' for line_no in range(1, 20)
         ])
 
-        self.traceback = Mock
-        self.traceback.tb_next = None
-        self.traceback.tb_frame = self.tb_frame
-
-        self.error_description = "Should be equal 1, 3 given"
-        self.step_result.set_exc_info(
-            exc_info=ExcInfo(
-                type_=AssertionError,
-                value=AssertionError(self.error_description),
-                traceback=self.traceback,
-            )
+        self.traced_file = mocked_traced_file(
+            filename=self.tests_dir / self.scenario_project_filename,
+            file_content=self.file_content,
+            line_start=2,
+            line_target=4,
+        )
+        self.failed_scenario = mocked_failed_scenario_result(
+            scenario_name=self.scenario_name,
+            scenario_project_filename=self.scenario_project_filename,
+            traced_file=self.traced_file,
+            tests_dir=self.tests_dir,
         )
 
-        self.scenario_result.add_step_result(self.step_result)
-
     async def given_failed_scenario_event(self):
-        self.event = ScenarioFailedEvent(scenario_result=self.scenario_result)
+        self.event = ScenarioFailedEvent(scenario_result=self.failed_scenario.scenario_result)
 
     async def when_vedro_fires_plugin_handler(self):
         with (
-            temp_file(self.scenario_path, self.filecontent),
+            temp_file(self.failed_scenario.scenario.path, self.failed_scenario.traced_file.file_content),
             mocked_jira_server_info() as self.jira_server_info_mock,
             mocked_jira_fields() as self.jira_fields_mock,
             mocked_jira_search() as self.jira_search_mock,
             mocked_jira_create(key='WORKSPACE-123') as self.jira_create_mock,
             mocked_jira_get_issue(key='WORKSPACE-123') as self.jira_get_issue_mock,
-
         ):
             self.plugin.on_scenario_failed(self.event)
 
@@ -139,9 +120,17 @@ class Scenario(vedro.Scenario):
     async def then_it_should_call_jira_for_create_new_issue(self):
         self.create_history = self.jira_create_mock.history
 
-        self.expected_auth_token = base64.b64encode(self.plugin_config.jira_user.encode() + b':' + self.plugin_config.jira_password.encode()).decode()
+        self.expected_auth_token = base64.b64encode(
+            self.plugin_config.jira_user.encode() + b':' + self.plugin_config.jira_password.encode()).decode()
 
-        self.expected_summary = f'[{self.plugin_config.report_project_name}] Флаки тест {self.scenario_name} (NOT_SET_PRIORITY)'
+        self.expected_summary = (f'[{self.plugin_config.report_project_name}] Флаки тест {self.scenario_name} ('
+                                 f'{IssuePriority.NOT_SET_PRIORITY})')
+
+        self.expected_summary = issue_summary(
+            test_name = self.scenario_name,
+            project_name = self.plugin_config.report_project_name,
+            priority = IssuePriority.NOT_SET_PRIORITY,
+        )
 
         self.expected_labels = self.jira_labels + [self.jira_flaky_label]
 
@@ -156,12 +145,15 @@ class Scenario(vedro.Scenario):
             '    7|line 7'
         ])
 
-        self.expected_descripption = RU_REPORTING_LANG.NEW_ISSUE_TEXT.format(
+        self.expected_description = RU_REPORTING_LANG.NEW_ISSUE_TEXT.format(
             test_name=self.scenario_name,
             test_file=self.scenario_project_filename,
-            priority='NOT_SET_PRIORITY',
+            priority=IssuePriority.NOT_SET_PRIORITY,
             traceback=self.expected_traceback,
-            error=AssertionError.__name__ + self.error_description,
+            error=(
+                self.failed_scenario.traced_file.error_type.__name__
+                + self.failed_scenario.traced_file.error_description
+            ),
             job_link=self.plugin_config.job_path.format(job_id=self.plugin_config.job_id),
         )
 
@@ -182,7 +174,7 @@ class Scenario(vedro.Scenario):
                                 'key': self.plugin_config.jira_project
                             },
                             'summary': self.expected_summary,
-                            'description': self.expected_descripption,
+                            'description': self.expected_description,
                             'issuetype': {
                                 'id': self.plugin_config.jira_issue_type_id
                             },
