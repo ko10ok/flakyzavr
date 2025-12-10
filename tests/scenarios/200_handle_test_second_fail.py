@@ -130,7 +130,7 @@ class Scenario(vedro.Scenario):
             }
         ]
 
-    async def then_it_should_call_jira_for_create_new_issue(self):
+    async def then_it_should_not_call_jira_for_create_new_issue(self):
         self.create_history = self.jira_create_mock.history
 
         assert self.create_history == HistorySchema % []
