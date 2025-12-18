@@ -181,7 +181,7 @@ class FlakyzavrPlugin(Plugin):
 
 class Flakyzavr(PluginConfig):
     plugin = FlakyzavrPlugin
-    description = "Report to jira about failed tests"
+    description = "Report failed tests to Jira"
 
     enabled = True
     report_enabled = False  # enable it when flaky run

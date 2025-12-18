@@ -5,3 +5,5 @@ d42<3.0
 district42-exp-types
 autoflake
 isort
+jj<3.0
+jj_d42<3.0
