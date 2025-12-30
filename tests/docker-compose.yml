@@ -11,6 +11,6 @@ services:
       - ..:/flakyzavr
 
   mock:
-    image: vedrouniverse/jj:2.10.0
+    image: vedrouniverse/jj:2.14.0
     ports:
       - "80"
