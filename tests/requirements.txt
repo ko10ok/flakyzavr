@@ -49,7 +49,7 @@ idna==3.11
     #   yarl
 isort==7.0.0
     # via -r requirements.in
-jj==2.13.1
+jj==2.14.0
     # via
     #   -r requirements.in
     #   jj-d42

@@ -1,4 +1,5 @@
 from flakyzavr.version import get_version
+
 from ._flakyzavr_plugin import Flakyzavr
 from ._flakyzavr_plugin import FlakyzavrPlugin
 from ._messages import EN_REPORTING_LANG

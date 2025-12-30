@@ -15,7 +15,7 @@ class ReportingLangSet(NamedTuple):
 
 
 RU_REPORTING_LANG = ReportingLangSet(
-    FILTERED_OUT_BY_EXCEPTION_REGEXP='Флаки тикета не будет создно. Падение отфильтровано по списку исключений.',
+    FILTERED_OUT_BY_EXCEPTION_REGEXP='Флаки тикета не будет создано. Падение отфильтровано по списку исключений.',
     SKIP_CREATING_ISSUE_DUE_TO_JIRA_SEARCH_UNAVAILABILITY=(
         '{jira_server} не был доступен во время поиска тикетов. '
         'Пропускаем создание тикета для текущего теста'
@@ -25,8 +25,8 @@ RU_REPORTING_LANG = ReportingLangSet(
         'Пропускаем создание тикета для текущего теста'
     ),
     SKIP_CREATING_COMMENT_IN_EXISTING_ISSUE_DUE_TO_JIRA_UNAVAILABILITY=(
-        '{jira_server} не был доступен во время добавления комментария о флакующем тесте. '
-        'Пропускаем создание коментария для текущего теста'
+        '{jira_server} не был доступен во время добавления комментария о флакающем тесте. '
+        'Пропускаем создание комментария для текущего теста'
     ),
     ISSUE_ALREADY_EXISTS='Флаки тикет уже есть {jira_server}/browse/{issue_key}',
     ISSUE_CREATED='Заведен новый флаки тикет {jira_server}/browse/{issue_key}',
