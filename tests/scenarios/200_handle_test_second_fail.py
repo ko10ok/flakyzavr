@@ -33,8 +33,7 @@ class Scenario(vedro.Scenario):
             report_enabled = False  # enable it when flaky run
 
             jira_server: str = 'http://mock'
-            jira_user: str = 'username'
-            jira_password: str = 'userpassword'
+            jira_token: str = 'jira_token'
             jira_project: str = 'jira_project'
             jira_components: list[str] = ['world']
             jira_labels: list[str] = ['new_flaky', 'qa_tech_debt']  # extra labels
