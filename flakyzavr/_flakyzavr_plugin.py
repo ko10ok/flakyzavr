@@ -27,8 +27,7 @@ class FlakyzavrPlugin(Plugin):
         self._report_enabled = config.report_enabled
 
         self._jira_server = config.jira_server
-        self._jira_user = config.jira_user
-        self._jira_password = config.jira_password
+        self._jira_token = config.jira_token
         self._jira_project = config.jira_project
         self._jira_labels = config.jira_labels
         self._jira_components = config.jira_components
@@ -101,7 +100,7 @@ class FlakyzavrPlugin(Plugin):
     def on_scenario_failed(self, event: Union[ScenarioPassedEvent, ScenarioFailedEvent]) -> None:
         self._jira = LazyJiraTrier(
             self._jira_server,
-            basic_auth=(self._jira_user, self._jira_password),
+            token=self._jira_token,
             dry_run=self._dry_run
         )
 
@@ -187,8 +186,7 @@ class Flakyzavr(PluginConfig):
     report_enabled = False  # enable it when flaky run
 
     jira_server: str = 'https://NOT_SET'
-    jira_user: str = 'NOT_SET'
-    jira_password: str = 'NOT_SET'
+    jira_token: str = 'NOT_SET'
     jira_project: str = 'NOT_SET'
     jira_components: list[str] = []
     jira_labels: list[str] = []

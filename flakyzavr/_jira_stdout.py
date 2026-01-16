@@ -20,16 +20,16 @@ class JiraUnavailable:
 
 
 class LazyJiraTrier:
-    def __init__(self, server, basic_auth, dry_run=False) -> None:
+    def __init__(self, server, token, dry_run=False) -> None:
         self._server = server
-        self._basic_auth = basic_auth
+        self._token = token
         self._jira = None
         self._dry_run = dry_run
 
     def connect(self) -> JIRA | JiraUnavailable:
         if not self._jira:
             try:
-                self._jira = JIRA(self._server, basic_auth=self._basic_auth)
+                self._jira = JIRA(server=self._server, token_auth=self._token)
             except JIRAError as e:
                 if e.status_code == 403:
                     raise JiraAuthorizationError from None

@@ -16,8 +16,7 @@ class Config(vedro.Config):
             report_enabled = True
 
             jira_server = 'https://jira.com'
-            jira_user = '***'
-            jira_password = '***'
+            jira_token = '***'
             jira_project = 'ProjewctName'
             jira_components = ['chat']
             jira_labels: list[str] = ['flaky', 'tech_debt_qa']

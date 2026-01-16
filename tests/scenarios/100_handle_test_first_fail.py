@@ -35,8 +35,7 @@ class Scenario(vedro.Scenario):
             report_enabled = False  # enable it when flaky run
 
             jira_server: str = 'http://mock'
-            jira_user: str = 'username'
-            jira_password: str = 'userpassword'
+            jira_token: str = 'jira_token'
             jira_project: str = 'jira_project'
             jira_components: list[str] = ['world']
             jira_labels: list[str] = ['new_flaky', 'qa_tech_debt']  # extra labels
@@ -120,12 +119,6 @@ class Scenario(vedro.Scenario):
     async def then_it_should_call_jira_for_create_new_issue(self):
         self.create_history = self.jira_create_mock.history
 
-        self.expected_auth_token = base64.b64encode(
-            self.plugin_config.jira_user.encode() + b':' + self.plugin_config.jira_password.encode()).decode()
-
-        self.expected_summary = (f'[{self.plugin_config.report_project_name}] Флаки тест {self.scenario_name} ('
-                                 f'{IssuePriority.NOT_SET_PRIORITY})')
-
         self.expected_summary = issue_summary(
             test_name = self.scenario_name,
             project_name = self.plugin_config.report_project_name,
@@ -165,7 +158,7 @@ class Scenario(vedro.Scenario):
                     "path": '/rest/api/2/issue',
                     'headers': [
                         ...,
-                        ['Authorization', f'Basic {self.expected_auth_token}'],
+                        ['Authorization', f'Bearer {self.plugin_config.jira_token}'],
                         ...,
                     ],
                     "body": {
